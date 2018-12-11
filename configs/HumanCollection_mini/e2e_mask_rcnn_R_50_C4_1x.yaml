@@ -1,0 +1,21 @@
+MODEL:
+  META_ARCHITECTURE: "GeneralizedRCNN"
+  WEIGHT: "/mnt/data1/pretrain_models/R-50.pkl"
+  RPN:
+    PRE_NMS_TOP_N_TEST: 6000
+    POST_NMS_TOP_N_TEST: 1000
+  ROI_MASK_HEAD:
+    PREDICTOR: "MaskRCNNC4Predictor"
+    SHARE_BOX_FEATURE_EXTRACTOR: True
+  MASK_ON: True
+DATASETS:
+  TRAIN: ("coco_HumanCollection_mini_trainval",)
+  TEST: ("coco_HumanCollection_mini_test",)
+DATALOADER:
+  SIZE_DIVISIBILITY: 32
+SOLVER:
+  BASE_LR: 0.0025
+  WEIGHT_DECAY: 0.0001
+  STEPS: (200000, 250000)
+  MAX_ITER: 300000
+  IMS_PER_BATCH: 1
