@@ -31,3 +31,4 @@ dist/
 checkpoints/
 foo/
 output/
+*.json
