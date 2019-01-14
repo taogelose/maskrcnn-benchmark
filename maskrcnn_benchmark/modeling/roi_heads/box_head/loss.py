@@ -136,6 +136,7 @@ class FastRCNNLossComputation(object):
             [proposal.get_field("regression_targets") for proposal in proposals], dim=0
         )
 
+        # print(class_logits.max(), labels.max())
         classification_loss = F.cross_entropy(class_logits, labels)
 
         # get indices that correspond to the regression targets for

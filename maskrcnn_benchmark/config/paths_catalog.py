@@ -12,7 +12,20 @@ class DatasetCatalog(object):
             "coco/train2014",
             "coco/annotations/instances_train2014.json",
         ),
-        "coco_2014_val": ("coco/val2014", "coco/annotations/instances_val2014.json"),
+        "coco_2014_val": (
+            "coco/val2014",
+            "coco/annotations/instances_val2014.json"
+        ),
+        # add VG dataset
+        "coco_VG_train": (
+            "/mnt/data1/zdf/data/relation/vg/stanford_filered/VG_train",
+            "/mnt/data1/zdf/data/relation/vg/stanford_filered/train.json",
+        ),
+        "coco_VG_val": (
+            "/mnt/data1/zdf/data/relation/vg/stanford_filered/VG_val",
+            "/mnt/data1/zdf/data/relation/vg/stanford_filered/val.json"
+        ),
+
         "coco_2014_minival": (
             "coco/val2014",
             "coco/annotations/instances_minival2014.json",
@@ -32,7 +45,17 @@ class DatasetCatalog(object):
             "/mnt/data1/Dataset/HW_dataset/HumanCollection_mini/coco/annotations/instances_HC_mini_test.json",
             "/mnt/data1/Dataset/HW_dataset/HumanCollection_mini/voc/Instances",
         ),
-
+        # for PIC dataset
+        "coco_PIC_train": (
+            "/mnt/data3/DataSet/PIC/image/train",
+            "/mnt/data3/DataSet/PIC/train.json",
+            "/mnt/data3/DataSet/PIC/segmentation/train/instance",
+        ),
+        "coco_PIC_val": (
+            "/mnt/data3/DataSet/PIC/image/val",
+            "/mnt/data3/DataSet/PIC/val.json",
+            "/mnt/data3/DataSet/PIC/segmentation/val/instance",
+        ),
     }
 
     @staticmethod
@@ -43,7 +66,7 @@ class DatasetCatalog(object):
             args = dict(
                 root=os.path.join(data_dir, attrs[0]),
                 ann_file=os.path.join(data_dir, attrs[1]),
-                png_label_path=os.path.join(data_dir, attrs[2]),
+                # png_label_path=os.path.join(data_dir, attrs[2]),
             )
             return dict(
                 factory="COCODataset",

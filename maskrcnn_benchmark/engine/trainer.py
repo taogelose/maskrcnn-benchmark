@@ -59,6 +59,11 @@ def do_train(
         iteration = iteration + 1
         arguments["iteration"] = iteration
 
+        # add ignore
+        if len(targets[0]) < 1:
+            print('num_boxes: ', len(targets[0]))
+            continue
+
         scheduler.step()
 
         images = images.to(device)

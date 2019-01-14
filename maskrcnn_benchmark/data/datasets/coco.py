@@ -9,6 +9,7 @@ from PIL import Image
 import os
 import os.path
 
+BOX_SCALE = 1024
 
 class CocoDetection(data.Dataset):
     """`MS Coco Detection <http://mscoco.org/dataset/#detections-challenge2016>`_ Dataset.
@@ -52,7 +53,7 @@ class CocoDetection(data.Dataset):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return img, target, path
+        return img, target
 
     def __len__(self):
         return len(self.ids)
@@ -70,10 +71,9 @@ class CocoDetection(data.Dataset):
 
 class COCODataset(CocoDetection):
     def __init__(
-        self, ann_file, root, png_label_path, remove_images_without_annotations, transforms=None
+        self, ann_file, root, remove_images_without_annotations, transforms=None
     ):
         super(COCODataset, self).__init__(root, ann_file)
-        self.png_label_path = png_label_path
         # sort indices for reproducible results
         self.ids = sorted(self.ids)
 
@@ -95,32 +95,30 @@ class COCODataset(CocoDetection):
         self.transforms = transforms
 
     def __getitem__(self, idx):
-        img, anno, img_name = super(COCODataset, self).__getitem__(idx)
-
+        img, anno = super(COCODataset, self).__getitem__(idx)
         # filter crowd annotations
         # TODO might be better to add an extra field
-        anno = [obj for obj in anno if obj["iscrowd"] == 0]
+        # anno = [obj for obj in anno if obj["iscrowd"] == 0]
+        anno = [obj for obj in anno]    # we don't mark crowd
 
         boxes = [obj["bbox"] for obj in anno]
+        if not boxes:
+            raise ValueError("Image id {} ({}) doesn't have annotations!".format(self.ids[idx], anno))
+
         boxes = torch.as_tensor(boxes).reshape(-1, 4)  # guard against no boxes
+        # scale the fucking boxes to the image_size level
+        boxes = boxes * max(img.size)/BOX_SCALE
+
         target = BoxList(boxes, img.size, mode="xywh").convert("xyxy")
 
         classes = [obj["category_id"] for obj in anno]
         classes = [self.json_category_id_to_contiguous_id[c] for c in classes]
         classes = torch.tensor(classes)
         target.add_field("labels", classes)
-        # original version
+
         # masks = [obj["segmentation"] for obj in anno]
         # masks = SegmentationMask(masks, img.size)
         # target.add_field("masks", masks)
-        png_mask = cv2.imread(os.path.join(self.png_label_path, img_name[:-4]+'.png'), flags=cv2.IMREAD_GRAYSCALE)
-        instance_nums = png_mask.max()
-        masks = []
-        for i in range(1, instance_nums+1):
-            mask = png_mask == i
-            masks.append(mask.astype(np.uint8))
-        masks = SegmentationMask_PNG(masks, img.size)
-        target.add_field("masks", masks)
 
         target = target.clip_to_image(remove_empty=True)
 
